@@ -1,0 +1,1748 @@
+{
+  "usersTable": [
+    {
+      "column_name": "id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "email",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "password_hash",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "full_name",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "role",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "department_id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "is_active",
+      "data_type": "boolean"
+    },
+    {
+      "column_name": "created_at",
+      "data_type": "timestamp without time zone"
+    },
+    {
+      "column_name": "dob",
+      "data_type": "date"
+    },
+    {
+      "column_name": "phone",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "contact_email",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "address",
+      "data_type": "text"
+    },
+    {
+      "column_name": "cccd",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "is_representative",
+      "data_type": "boolean"
+    }
+  ],
+  "upTable": [
+    {
+      "column_name": "id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "user_id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "org_id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "title",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "role",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "role_config_id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "permission_level",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "is_primary",
+      "data_type": "boolean"
+    },
+    {
+      "column_name": "created_at",
+      "data_type": "timestamp without time zone"
+    }
+  ],
+  "orgTable": [
+    {
+      "column_name": "id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "parent_id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "name_id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "code",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "type",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "level",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "is_active",
+      "data_type": "boolean"
+    },
+    {
+      "column_name": "created_at",
+      "data_type": "timestamp without time zone"
+    }
+  ],
+  "users": [
+    {
+      "id": 4,
+      "full_name": "Nguyễn Thị Hà",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.pth@neu.edu.vn"
+    },
+    {
+      "id": 7,
+      "full_name": "PGS.TS. Trần Minh Đức",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.ptccb@neu.edu.vn"
+    },
+    {
+      "id": 1,
+      "full_name": "Quản trị viên Hệ thống",
+      "role": "admin",
+      "department_id": null,
+      "email": "admin@neu.edu.vn"
+    },
+    {
+      "id": 2,
+      "full_name": "GS.TS. Nguyễn Văn Anh",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.pth@neu.edu.vn"
+    },
+    {
+      "id": 3,
+      "full_name": "ThS. Trần Thị Hoa",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.pth@neu.edu.vn"
+    },
+    {
+      "id": 5,
+      "full_name": "Trần Văn Dũng",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.pth@neu.edu.vn"
+    },
+    {
+      "id": 6,
+      "full_name": "Nguyễn Thị Bích",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.pth@neu.edu.vn"
+    },
+    {
+      "id": 8,
+      "full_name": "ThS. Lê Thanh Phương",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.ptccb@neu.edu.vn"
+    },
+    {
+      "id": 9,
+      "full_name": "Trần Thị Mai",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.ptccb@neu.edu.vn"
+    },
+    {
+      "id": 10,
+      "full_name": "Lê Văn Chính",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.ptccb@neu.edu.vn"
+    },
+    {
+      "id": 11,
+      "full_name": "Trần Thị Thanh",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.ptccb@neu.edu.vn"
+    },
+    {
+      "id": 12,
+      "full_name": "TS. Lê Hoài Nam",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.pqldt@neu.edu.vn"
+    },
+    {
+      "id": 13,
+      "full_name": "ThS. Phạm Thu Lan",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.pqldt@neu.edu.vn"
+    },
+    {
+      "id": 14,
+      "full_name": "Lê Thị Thúy",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.pqldt@neu.edu.vn"
+    },
+    {
+      "id": 15,
+      "full_name": "Phạm Văn Thắng",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.pqldt@neu.edu.vn"
+    },
+    {
+      "id": 16,
+      "full_name": "Lê Thị Phương",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.pqldt@neu.edu.vn"
+    },
+    {
+      "id": 17,
+      "full_name": "PGS.TS. Phạm Đức Hùng",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.ptckt@neu.edu.vn"
+    },
+    {
+      "id": 18,
+      "full_name": "ThS. Hoàng Ngọc Anh",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.ptckt@neu.edu.vn"
+    },
+    {
+      "id": 19,
+      "full_name": "Phạm Thị Linh",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.ptckt@neu.edu.vn"
+    },
+    {
+      "id": 20,
+      "full_name": "Hoàng Văn Quân",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.ptckt@neu.edu.vn"
+    },
+    {
+      "id": 21,
+      "full_name": "Phạm Thị Nhung",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.ptckt@neu.edu.vn"
+    },
+    {
+      "id": 22,
+      "full_name": "TS. Hoàng Văn Tùng",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.tktqlc@neu.edu.vn"
+    },
+    {
+      "id": 23,
+      "full_name": "ThS. Nguyễn Việt Hùng",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.tktqlc@neu.edu.vn"
+    },
+    {
+      "id": 24,
+      "full_name": "Hoàng Thị Hạnh",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.tktqlc@neu.edu.vn"
+    },
+    {
+      "id": 25,
+      "full_name": "Đỗ Văn Bình",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.tktqlc@neu.edu.vn"
+    },
+    {
+      "id": 26,
+      "full_name": "Hoàng Thị Thảo",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.tktqlc@neu.edu.vn"
+    },
+    {
+      "id": 27,
+      "full_name": "PGS.TS. Đỗ Quốc Bảo",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.tkd@neu.edu.vn"
+    },
+    {
+      "id": 28,
+      "full_name": "ThS. Đỗ Thị Bích",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.tkd@neu.edu.vn"
+    },
+    {
+      "id": 29,
+      "full_name": "Đỗ Thị Liên",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.tkd@neu.edu.vn"
+    },
+    {
+      "id": 30,
+      "full_name": "Vũ Văn Lâm",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.tkd@neu.edu.vn"
+    },
+    {
+      "id": 31,
+      "full_name": "Đỗ Thị Hà",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.tkd@neu.edu.vn"
+    },
+    {
+      "id": 32,
+      "full_name": "TS. Vũ Thanh Hải",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.tcn@neu.edu.vn"
+    },
+    {
+      "id": 33,
+      "full_name": "ThS. Vũ Minh Hiếu",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.tcn@neu.edu.vn"
+    },
+    {
+      "id": 34,
+      "full_name": "Vũ Thị Nga",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.tcn@neu.edu.vn"
+    },
+    {
+      "id": 35,
+      "full_name": "Bùi Hữu Hoa",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.tcn@neu.edu.vn"
+    },
+    {
+      "id": 36,
+      "full_name": "Vũ Thị Oanh",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.tcn@neu.edu.vn"
+    },
+    {
+      "id": 37,
+      "full_name": "TS. Bùi Trọng Minh",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.kth@neu.edu.vn"
+    },
+    {
+      "id": 38,
+      "full_name": "ThS. Bùi Thị Ngọc",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.kth@neu.edu.vn"
+    },
+    {
+      "id": 39,
+      "full_name": "Bùi Thị Trang",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.kth@neu.edu.vn"
+    },
+    {
+      "id": 40,
+      "full_name": "Nguyễn Ngọc Hải",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.kth@neu.edu.vn"
+    },
+    {
+      "id": 41,
+      "full_name": "Bùi Thị Diệp",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.kth@neu.edu.vn"
+    },
+    {
+      "id": 42,
+      "full_name": "PGS.TS. Đặng Văn Long",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.khpt@neu.edu.vn"
+    },
+    {
+      "id": 43,
+      "full_name": "ThS. Đặng Quang Trường",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.khpt@neu.edu.vn"
+    },
+    {
+      "id": 44,
+      "full_name": "Đặng Thị Thu",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.khpt@neu.edu.vn"
+    },
+    {
+      "id": 45,
+      "full_name": "Phan Văn Tuấn",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.khpt@neu.edu.vn"
+    },
+    {
+      "id": 46,
+      "full_name": "Đặng Thị Cẩm",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.khpt@neu.edu.vn"
+    },
+    {
+      "id": 47,
+      "full_name": "TS. Lý Tuấn Kiệt",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.dt@neu.edu.vn"
+    },
+    {
+      "id": 48,
+      "full_name": "ThS. Lương Thị Hằng",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.dt@neu.edu.vn"
+    },
+    {
+      "id": 49,
+      "full_name": "Lý Thị Ngân",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.dt@neu.edu.vn"
+    },
+    {
+      "id": 50,
+      "full_name": "Tạ Hữu Lực",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.dt@neu.edu.vn"
+    },
+    {
+      "id": 51,
+      "full_name": "Lý Thị Kim",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.dt@neu.edu.vn"
+    },
+    {
+      "id": 52,
+      "full_name": "PGS.TS. Đinh Thị Hoa",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.mkt@neu.edu.vn"
+    },
+    {
+      "id": 53,
+      "full_name": "ThS. Phan Thành Đạt",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.mkt@neu.edu.vn"
+    },
+    {
+      "id": 54,
+      "full_name": "Ngô Thị Hương",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.mkt@neu.edu.vn"
+    },
+    {
+      "id": 55,
+      "full_name": "Đinh Văn Sơn",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.mkt@neu.edu.vn"
+    },
+    {
+      "id": 56,
+      "full_name": "Phan Thị Mỹ",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.mkt@neu.edu.vn"
+    },
+    {
+      "id": 57,
+      "full_name": "TS. Ngô Thị Lan",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.qtkd@neu.edu.vn"
+    },
+    {
+      "id": 58,
+      "full_name": "ThS. Lê Minh Tú",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.qtkd@neu.edu.vn"
+    },
+    {
+      "id": 59,
+      "full_name": "Tạ Thị Loan",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.qtkd@neu.edu.vn"
+    },
+    {
+      "id": 60,
+      "full_name": "Trịnh Văn Hải",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.qtkd@neu.edu.vn"
+    },
+    {
+      "id": 61,
+      "full_name": "Tạ Thị Liên",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.qtkd@neu.edu.vn"
+    },
+    {
+      "id": 62,
+      "full_name": "GS.TS. Nguyễn Văn Anh",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.kkt@neu.edu.vn"
+    },
+    {
+      "id": 63,
+      "full_name": "ThS. Trần Thị Hoa",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.kkt@neu.edu.vn"
+    },
+    {
+      "id": 64,
+      "full_name": "Nguyễn Thị Hà",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.kkt@neu.edu.vn"
+    },
+    {
+      "id": 65,
+      "full_name": "Trần Văn Dũng",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.kkt@neu.edu.vn"
+    },
+    {
+      "id": 66,
+      "full_name": "Nguyễn Thị Bích",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.kkt@neu.edu.vn"
+    },
+    {
+      "id": 67,
+      "full_name": "PGS.TS. Trần Minh Đức",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.cntt@neu.edu.vn"
+    },
+    {
+      "id": 68,
+      "full_name": "ThS. Lê Thanh Phương",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.cntt@neu.edu.vn"
+    },
+    {
+      "id": 69,
+      "full_name": "Trần Thị Mai",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.cntt@neu.edu.vn"
+    },
+    {
+      "id": 70,
+      "full_name": "Lê Văn Chính",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.cntt@neu.edu.vn"
+    },
+    {
+      "id": 71,
+      "full_name": "Trần Thị Thanh",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.cntt@neu.edu.vn"
+    },
+    {
+      "id": 72,
+      "full_name": "TS. Lê Hoài Nam",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.ai@neu.edu.vn"
+    },
+    {
+      "id": 74,
+      "full_name": "Lê Thị Thúy",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.ai@neu.edu.vn"
+    },
+    {
+      "id": 75,
+      "full_name": "Phạm Văn Thắng",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.ai@neu.edu.vn"
+    },
+    {
+      "id": 76,
+      "full_name": "Lê Thị Phương",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.ai@neu.edu.vn"
+    },
+    {
+      "id": 77,
+      "full_name": "PGS.TS. Phạm Đức Hùng",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "tp.httt@neu.edu.vn"
+    },
+    {
+      "id": 78,
+      "full_name": "ThS. Hoàng Ngọc Anh",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.httt@neu.edu.vn"
+    },
+    {
+      "id": 79,
+      "full_name": "Phạm Thị Linh",
+      "role": "van_thu",
+      "department_id": null,
+      "email": "vt.httt@neu.edu.vn"
+    },
+    {
+      "id": 80,
+      "full_name": "Hoàng Văn Quân",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv1.httt@neu.edu.vn"
+    },
+    {
+      "id": 81,
+      "full_name": "Phạm Thị Nhung",
+      "role": "nhan_vien",
+      "department_id": null,
+      "email": "cv2.httt@neu.edu.vn"
+    },
+    {
+      "id": 73,
+      "full_name": "ThS. Phạm Thu Lan",
+      "role": "lanh_dao",
+      "department_id": null,
+      "email": "pp.ai@neu.edu.vn"
+    }
+  ],
+  "positions": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "org_id": 1,
+      "title": "Quản trị hệ thống",
+      "role": "admin",
+      "role_config_id": 1,
+      "permission_level": 65,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 2,
+      "user_id": 2,
+      "org_id": 4,
+      "title": "Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 3,
+      "user_id": 3,
+      "org_id": 4,
+      "title": "Phó Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 5,
+      "user_id": 5,
+      "org_id": 4,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 6,
+      "user_id": 6,
+      "org_id": 4,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 8,
+      "user_id": 8,
+      "org_id": 5,
+      "title": "Phó Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 9,
+      "user_id": 9,
+      "org_id": 5,
+      "title": "Văn thư",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 39,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 10,
+      "user_id": 10,
+      "org_id": 5,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 11,
+      "user_id": 11,
+      "org_id": 5,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 12,
+      "user_id": 12,
+      "org_id": 6,
+      "title": "Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 13,
+      "user_id": 13,
+      "org_id": 6,
+      "title": "Phó Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 14,
+      "user_id": 14,
+      "org_id": 6,
+      "title": "Văn thư",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 39,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 15,
+      "user_id": 15,
+      "org_id": 6,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 16,
+      "user_id": 16,
+      "org_id": 6,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 17,
+      "user_id": 17,
+      "org_id": 7,
+      "title": "Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 18,
+      "user_id": 18,
+      "org_id": 7,
+      "title": "Phó Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 19,
+      "user_id": 19,
+      "org_id": 7,
+      "title": "Văn thư",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 39,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 20,
+      "user_id": 20,
+      "org_id": 7,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 21,
+      "user_id": 21,
+      "org_id": 7,
+      "title": "Chuyên viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 22,
+      "user_id": 22,
+      "org_id": 8,
+      "title": "Hiệu trưởng",
+      "role": "lanh_dao",
+      "role_config_id": 3,
+      "permission_level": 43,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 23,
+      "user_id": 23,
+      "org_id": 8,
+      "title": "Phó Hiệu trưởng",
+      "role": "lanh_dao",
+      "role_config_id": 3,
+      "permission_level": 43,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 24,
+      "user_id": 24,
+      "org_id": 8,
+      "title": "Văn thư",
+      "role": "van_thu",
+      "role_config_id": 6,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 25,
+      "user_id": 25,
+      "org_id": 8,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 26,
+      "user_id": 26,
+      "org_id": 8,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 27,
+      "user_id": 27,
+      "org_id": 9,
+      "title": "Hiệu trưởng",
+      "role": "lanh_dao",
+      "role_config_id": 3,
+      "permission_level": 43,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 28,
+      "user_id": 28,
+      "org_id": 9,
+      "title": "Phó Hiệu trưởng",
+      "role": "lanh_dao",
+      "role_config_id": 3,
+      "permission_level": 43,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 29,
+      "user_id": 29,
+      "org_id": 9,
+      "title": "Văn thư",
+      "role": "van_thu",
+      "role_config_id": 6,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 30,
+      "user_id": 30,
+      "org_id": 9,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 31,
+      "user_id": 31,
+      "org_id": 9,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 32,
+      "user_id": 32,
+      "org_id": 10,
+      "title": "Hiệu trưởng",
+      "role": "lanh_dao",
+      "role_config_id": 3,
+      "permission_level": 43,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 33,
+      "user_id": 33,
+      "org_id": 10,
+      "title": "Phó Hiệu trưởng",
+      "role": "lanh_dao",
+      "role_config_id": 3,
+      "permission_level": 43,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 34,
+      "user_id": 34,
+      "org_id": 10,
+      "title": "Văn thư",
+      "role": "van_thu",
+      "role_config_id": 6,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 35,
+      "user_id": 35,
+      "org_id": 10,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 36,
+      "user_id": 36,
+      "org_id": 10,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 38,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 37,
+      "user_id": 37,
+      "org_id": 11,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 38,
+      "user_id": 38,
+      "org_id": 11,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 39,
+      "user_id": 39,
+      "org_id": 11,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 40,
+      "user_id": 40,
+      "org_id": 11,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 41,
+      "user_id": 41,
+      "org_id": 11,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 42,
+      "user_id": 42,
+      "org_id": 12,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 43,
+      "user_id": 43,
+      "org_id": 12,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 44,
+      "user_id": 44,
+      "org_id": 12,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 45,
+      "user_id": 45,
+      "org_id": 12,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 46,
+      "user_id": 46,
+      "org_id": 12,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 47,
+      "user_id": 47,
+      "org_id": 13,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 48,
+      "user_id": 48,
+      "org_id": 13,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 49,
+      "user_id": 49,
+      "org_id": 13,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 50,
+      "user_id": 50,
+      "org_id": 13,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 51,
+      "user_id": 51,
+      "org_id": 13,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 52,
+      "user_id": 52,
+      "org_id": 14,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 53,
+      "user_id": 53,
+      "org_id": 14,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 54,
+      "user_id": 54,
+      "org_id": 14,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 55,
+      "user_id": 55,
+      "org_id": 14,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 56,
+      "user_id": 56,
+      "org_id": 14,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 57,
+      "user_id": 57,
+      "org_id": 15,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 58,
+      "user_id": 58,
+      "org_id": 15,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 59,
+      "user_id": 59,
+      "org_id": 15,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 60,
+      "user_id": 60,
+      "org_id": 15,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 61,
+      "user_id": 61,
+      "org_id": 15,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 62,
+      "user_id": 62,
+      "org_id": 16,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 63,
+      "user_id": 63,
+      "org_id": 16,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 64,
+      "user_id": 64,
+      "org_id": 16,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 65,
+      "user_id": 65,
+      "org_id": 16,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 66,
+      "user_id": 66,
+      "org_id": 16,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 67,
+      "user_id": 67,
+      "org_id": 17,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 68,
+      "user_id": 68,
+      "org_id": 17,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 69,
+      "user_id": 69,
+      "org_id": 17,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 70,
+      "user_id": 70,
+      "org_id": 17,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 71,
+      "user_id": 71,
+      "org_id": 17,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 72,
+      "user_id": 72,
+      "org_id": 18,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 73,
+      "user_id": 73,
+      "org_id": 18,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 74,
+      "user_id": 74,
+      "org_id": 18,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 75,
+      "user_id": 75,
+      "org_id": 18,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 76,
+      "user_id": 76,
+      "org_id": 18,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 77,
+      "user_id": 77,
+      "org_id": 19,
+      "title": "Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 78,
+      "user_id": 78,
+      "org_id": 19,
+      "title": "Phó Trưởng khoa",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 31,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 79,
+      "user_id": 79,
+      "org_id": 19,
+      "title": "Thư ký khoa",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 29,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 80,
+      "user_id": 80,
+      "org_id": 19,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 81,
+      "user_id": 81,
+      "org_id": 19,
+      "title": "Giảng viên",
+      "role": "nhan_vien",
+      "role_config_id": 8,
+      "permission_level": 28,
+      "is_primary": true,
+      "created_at": "2026-03-05T16:45:44.481Z"
+    },
+    {
+      "id": 82,
+      "user_id": 4,
+      "org_id": 4,
+      "title": "Văn thư",
+      "role": "van_thu",
+      "role_config_id": 7,
+      "permission_level": 39,
+      "is_primary": true,
+      "created_at": "2026-03-09T07:19:18.784Z"
+    },
+    {
+      "id": 83,
+      "user_id": 7,
+      "org_id": 5,
+      "title": "Trưởng phòng",
+      "role": "lanh_dao",
+      "role_config_id": 4,
+      "permission_level": 41,
+      "is_primary": true,
+      "created_at": "2026-03-10T16:12:35.538Z"
+    }
+  ],
+  "orgs": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "level": 1,
+      "type": "truong",
+      "name": "Đại học Kinh tế Quốc dân",
+      "parent_name": null
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "level": 2,
+      "type": "khoi",
+      "name": "Khối Đơn vị Chức năng",
+      "parent_name": "Đại học Kinh tế Quốc dân"
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "level": 2,
+      "type": "khoi",
+      "name": "Khối Đơn vị Đào tạo",
+      "parent_name": "Đại học Kinh tế Quốc dân"
+    },
+    {
+      "id": 4,
+      "parent_id": 2,
+      "level": 3,
+      "type": "phong",
+      "name": "Phòng Tổng hợp",
+      "parent_name": "Khối Đơn vị Chức năng"
+    },
+    {
+      "id": 5,
+      "parent_id": 2,
+      "level": 3,
+      "type": "phong",
+      "name": "Phòng Tổ chức Cán bộ",
+      "parent_name": "Khối Đơn vị Chức năng"
+    },
+    {
+      "id": 6,
+      "parent_id": 2,
+      "level": 3,
+      "type": "phong",
+      "name": "Phòng Quản lý Đào tạo",
+      "parent_name": "Khối Đơn vị Chức năng"
+    },
+    {
+      "id": 7,
+      "parent_id": 2,
+      "level": 3,
+      "type": "phong",
+      "name": "Phòng Tài chính Kế toán",
+      "parent_name": "Khối Đơn vị Chức năng"
+    },
+    {
+      "id": 8,
+      "parent_id": 3,
+      "level": 3,
+      "type": "truong",
+      "name": "Trường Kinh tế và Quản lý công",
+      "parent_name": "Khối Đơn vị Đào tạo"
+    },
+    {
+      "id": 9,
+      "parent_id": 3,
+      "level": 3,
+      "type": "truong",
+      "name": "Trường Kinh doanh",
+      "parent_name": "Khối Đơn vị Đào tạo"
+    },
+    {
+      "id": 10,
+      "parent_id": 3,
+      "level": 3,
+      "type": "truong",
+      "name": "Trường Công nghệ",
+      "parent_name": "Khối Đơn vị Đào tạo"
+    },
+    {
+      "id": 11,
+      "parent_id": 8,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Kinh tế học",
+      "parent_name": "Trường Kinh tế và Quản lý công"
+    },
+    {
+      "id": 12,
+      "parent_id": 8,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Kế hoạch và Phát triển",
+      "parent_name": "Trường Kinh tế và Quản lý công"
+    },
+    {
+      "id": 13,
+      "parent_id": 8,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Đầu tư",
+      "parent_name": "Trường Kinh tế và Quản lý công"
+    },
+    {
+      "id": 14,
+      "parent_id": 9,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Marketing",
+      "parent_name": "Trường Kinh doanh"
+    },
+    {
+      "id": 15,
+      "parent_id": 9,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Quản trị Kinh doanh",
+      "parent_name": "Trường Kinh doanh"
+    },
+    {
+      "id": 16,
+      "parent_id": 9,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Kế toán",
+      "parent_name": "Trường Kinh doanh"
+    },
+    {
+      "id": 17,
+      "parent_id": 10,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Công nghệ thông tin",
+      "parent_name": "Trường Công nghệ"
+    },
+    {
+      "id": 18,
+      "parent_id": 10,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Trí tuệ nhân tạo",
+      "parent_name": "Trường Công nghệ"
+    },
+    {
+      "id": 19,
+      "parent_id": 10,
+      "level": 4,
+      "type": "khoa",
+      "name": "Khoa Hệ thống thông tin",
+      "parent_name": "Trường Công nghệ"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE document_symbols ADD COLUMN IF NOT EXISTS document_type VARCHAR(255);
+ALTER TABLE document_books ADD COLUMN IF NOT EXISTS document_type VARCHAR(255);
+ALTER TABLE document_books ADD COLUMN IF NOT EXISTS symbol VARCHAR(255);
+
+COMMIT;
