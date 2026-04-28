@@ -116,11 +116,15 @@ const VALID_PHUONG_THUC = new Set(['dien_tu', 'giay', 'ca_hai']);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // GET /van-ban-di — list
+// Với tab 'bi_tu_choi_tiep_nhan' và 'bi_tra_lai': lấy từ outgoing_internal_inbox
+// (mỗi người từ chối/trả lại = 1 bản sao).
 // ═══════════════════════════════════════════════════════════════════════════════
+const INBOX_TABS = { bi_tu_choi_tiep_nhan: 'tu_choi', bi_tra_lai: 'da_tra_lai' };
+
 const list = async (req, res) => {
     try {
         const {
-            tab = 'cho_cap_ky_so',   // 'cho_cap_ky_so' | 'so_van_ban_di_co_quan' | ...
+            tab = 'cho_cap_ky_so',
             search,
             page = 1,
             limit = 20,
@@ -128,11 +132,113 @@ const list = async (req, res) => {
             sort_dir = 'desc',
         } = req.query;
 
+        const userId = req.user?.id || null;
+
+        // ── Helper: count cho 3 tab doc-based + 2 tab inbox-based ──
+        const buildCounts = async () => {
+            const counts = {
+                cho_cap_ky_so: 0,
+                so_van_ban_di_co_quan: 0,
+                bi_tu_choi_tiep_nhan: 0,
+                bi_tra_lai: 0,
+                da_tra_lai: 0,
+            };
+            const countSql = `SELECT trang_thai, COUNT(*)::int AS cnt
+                              FROM outgoing_documents WHERE is_deleted = false
+                              GROUP BY trang_thai`;
+            const countRes = await db.query(countSql);
+            for (const r of countRes.rows) {
+                if (counts.hasOwnProperty(r.trang_thai)) counts[r.trang_thai] = r.cnt;
+            }
+            if (userId) {
+                const inboxCount = await db.query(
+                    `SELECT trang_thai, COUNT(*)::int AS cnt
+                     FROM outgoing_internal_inbox
+                     WHERE sent_by = $1 AND hidden_for_sender = false
+                       AND trang_thai IN ('tu_choi', 'da_tra_lai')
+                     GROUP BY trang_thai`,
+                    [userId]
+                );
+                for (const r of inboxCount.rows) {
+                    if (r.trang_thai === 'tu_choi') counts.bi_tu_choi_tiep_nhan = r.cnt;
+                    if (r.trang_thai === 'da_tra_lai') counts.bi_tra_lai = r.cnt;
+                }
+            }
+            return counts;
+        };
+
+        // ── Tab inbox-based: bi_tu_choi_tiep_nhan | bi_tra_lai ──
+        if (INBOX_TABS[tab] && userId) {
+            const kind = INBOX_TABS[tab];
+            const conditions = [
+                'i.sent_by = $1',
+                'i.trang_thai = $2',
+                'i.hidden_for_sender = false',
+                'd.is_deleted = false',
+            ];
+            const params = [userId, kind];
+            let idx = 3;
+
+            if (search && String(search).trim()) {
+                conditions.push(
+                    `(d.trich_yeu ILIKE $${idx} OR d.so_ky_hieu ILIKE $${idx} OR u.full_name ILIKE $${idx} OR COALESCE(i.ly_do,'') ILIKE $${idx})`
+                );
+                params.push(`%${search.trim()}%`);
+                idx++;
+            }
+
+            const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+            const sql = `
+                SELECT i.id AS inbox_id, i.trang_thai AS inbox_trang_thai, i.ly_do, i.responded_at,
+                       u.id AS recipient_user_id, u.full_name AS recipient_name, u.chuc_vu AS recipient_chuc_vu,
+                       d.*,
+                       b.name AS book_name, b.symbol AS book_symbol,
+                       uk.full_name AS nguoi_ky_full_name,
+                       us.full_name AS nguoi_soan_thao_full_name,
+                       uc.full_name AS created_by_full_name
+                FROM outgoing_internal_inbox i
+                JOIN outgoing_documents d ON d.id = i.outgoing_id
+                JOIN users u ON u.id = i.user_id
+                LEFT JOIN document_books b ON b.id = d.book_id
+                LEFT JOIN users uk ON uk.id = d.nguoi_ky_id
+                LEFT JOIN users us ON us.id = d.nguoi_soan_thao_id
+                LEFT JOIN users uc ON uc.id = d.created_by
+                WHERE ${conditions.join(' AND ')}
+                ORDER BY i.responded_at DESC NULLS LAST, i.id DESC
+                LIMIT $${idx++} OFFSET $${idx++}
+            `;
+            params.push(parseInt(limit, 10), offset);
+            const { rows } = await db.query(sql, params);
+
+            const counts = await buildCounts();
+
+            const items = [];
+            for (const row of rows) {
+                const files = await fetchFiles(row.id);
+                items.push({
+                    ...shape({ ...row, files }),
+                    inboxId: row.inbox_id,
+                    inboxTrangThai: row.inbox_trang_thai,
+                    inboxLyDo: row.ly_do,
+                    inboxRespondedAt: row.responded_at,
+                    recipient: {
+                        id: row.recipient_user_id,
+                        name: row.recipient_name,
+                        chucVu: row.recipient_chuc_vu,
+                    },
+                });
+            }
+
+            return ok(res, { items, counts }, 'Lấy danh sách văn bản đi thành công');
+        }
+
+        // ── Tab doc-based ──
         const conditions = ['d.is_deleted = false'];
         const params = [];
         let idx = 1;
 
-        if (tab && VALID_TRANG_THAI.has(tab)) {
+        const docTabs = new Set(['cho_cap_ky_so', 'so_van_ban_di_co_quan', 'da_tra_lai']);
+        if (docTabs.has(tab)) {
             conditions.push(`d.trang_thai = $${idx++}`);
             params.push(tab);
         }
@@ -151,7 +257,6 @@ const list = async (req, res) => {
         const safeSortDir = String(sort_dir).toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
         const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-
         const sql = `
             SELECT d.*,
                    b.name   AS book_name,
@@ -171,24 +276,8 @@ const list = async (req, res) => {
         params.push(parseInt(limit, 10), offset);
 
         const { rows } = await db.query(sql, params);
+        const counts = await buildCounts();
 
-        // Count theo tab (cho badge số lượng)
-        const countSql = `SELECT trang_thai, COUNT(*)::int AS cnt
-                          FROM outgoing_documents WHERE is_deleted = false
-                          GROUP BY trang_thai`;
-        const countRes = await db.query(countSql);
-        const counts = {
-            cho_cap_ky_so: 0,
-            so_van_ban_di_co_quan: 0,
-            bi_tu_choi_tiep_nhan: 0,
-            bi_tra_lai: 0,
-            da_tra_lai: 0,
-        };
-        for (const r of countRes.rows) {
-            if (counts.hasOwnProperty(r.trang_thai)) counts[r.trang_thai] = r.cnt;
-        }
-
-        // Gắn files vào mỗi record
         const items = [];
         for (const row of rows) {
             const files = await fetchFiles(row.id);
@@ -955,7 +1044,8 @@ const listInternalInbox = async (req, res) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// POST /van-ban-noi-bo-tiep-nhan/:inboxId/da-doc — đánh dấu đã đọc
+// POST /van-ban-noi-bo-tiep-nhan/:inboxId/da-doc — đánh dấu đã đọc (không đổi logic
+// tiếp nhận; chỉ dùng lúc mở xem preview nhanh).
 // ═══════════════════════════════════════════════════════════════════════════════
 const markInboxAsRead = async (req, res) => {
     try {
@@ -974,6 +1064,332 @@ const markInboxAsRead = async (req, res) => {
         return ok(res, { id: inboxId }, 'Đã đánh dấu đã đọc');
     } catch (err) {
         console.error('outgoingDocuments markInboxAsRead error:', err);
+        return fail(res, 'Lỗi server', 500);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// POST /van-ban-noi-bo-tiep-nhan/:inboxId/tiep-nhan — người nhận tiếp nhận VB
+// ═══════════════════════════════════════════════════════════════════════════════
+const tiepNhanInbox = async (req, res) => {
+    try {
+        const inboxId = parseInt(req.params.inboxId, 10);
+        const userId = req.user?.id;
+        if (!inboxId) return fail(res, 'ID không hợp lệ');
+
+        const check = await db.query(
+            `SELECT trang_thai, outgoing_id FROM outgoing_internal_inbox WHERE id = $1 AND user_id = $2`,
+            [inboxId, userId]
+        );
+        if (!check.rows.length) return fail(res, 'Không tìm thấy văn bản trong hộp thư', 404);
+        if (['tu_choi', 'da_tra_lai'].includes(check.rows[0].trang_thai)) {
+            return fail(res, 'Văn bản đã được từ chối/trả lại, không thể tiếp nhận.');
+        }
+
+        await db.query(
+            `UPDATE outgoing_internal_inbox
+             SET trang_thai   = 'da_tiep_nhan',
+                 responded_at = NOW(),
+                 read_at      = COALESCE(read_at, NOW())
+             WHERE id = $1 AND user_id = $2`,
+            [inboxId, userId]
+        );
+
+        await logHistory({
+            document_id: check.rows[0].outgoing_id,
+            hanh_dong: 'TIEP_NHAN_NOI_BO',
+            noi_dung: 'Người nhận đã tiếp nhận văn bản nội bộ',
+            thuc_hien_boi: userId,
+        });
+
+        return ok(res, { id: inboxId }, 'Đã tiếp nhận văn bản');
+    } catch (err) {
+        console.error('outgoingDocuments tiepNhanInbox error:', err);
+        return fail(res, 'Lỗi server', 500);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// POST /van-ban-noi-bo-tiep-nhan/:inboxId/tu-choi — người nhận từ chối tiếp nhận
+//   Body: { ly_do: string }
+// ═══════════════════════════════════════════════════════════════════════════════
+const tuChoiInbox = async (req, res) => {
+    try {
+        const inboxId = parseInt(req.params.inboxId, 10);
+        const userId = req.user?.id;
+        const lyDo = (req.body?.ly_do || '').trim();
+        if (!inboxId) return fail(res, 'ID không hợp lệ');
+        if (!lyDo) return fail(res, 'Vui lòng nhập lý do từ chối');
+
+        const check = await db.query(
+            `SELECT trang_thai, outgoing_id FROM outgoing_internal_inbox WHERE id = $1 AND user_id = $2`,
+            [inboxId, userId]
+        );
+        if (!check.rows.length) return fail(res, 'Không tìm thấy văn bản trong hộp thư', 404);
+        if (['da_tiep_nhan', 'da_tra_lai'].includes(check.rows[0].trang_thai)) {
+            return fail(res, 'Văn bản đã được tiếp nhận/trả lại, không thể từ chối.');
+        }
+
+        await db.query(
+            `UPDATE outgoing_internal_inbox
+             SET trang_thai        = 'tu_choi',
+                 ly_do             = $3,
+                 responded_at      = NOW(),
+                 hidden_for_sender = false
+             WHERE id = $1 AND user_id = $2`,
+            [inboxId, userId, lyDo]
+        );
+
+        await logHistory({
+            document_id: check.rows[0].outgoing_id,
+            hanh_dong: 'TU_CHOI_TIEP_NHAN',
+            noi_dung: `Người nhận từ chối tiếp nhận. Lý do: ${lyDo}`,
+            thuc_hien_boi: userId,
+        });
+
+        return ok(res, { id: inboxId }, 'Đã từ chối tiếp nhận');
+    } catch (err) {
+        console.error('outgoingDocuments tuChoiInbox error:', err);
+        return fail(res, 'Lỗi server', 500);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// POST /van-ban-noi-bo-tiep-nhan/:inboxId/tra-lai — người nhận trả lại VB (sau khi
+// đã tiếp nhận, xem xong, muốn trả về người gửi).
+//   Body: { ly_do: string }
+// ═══════════════════════════════════════════════════════════════════════════════
+const traLaiInbox = async (req, res) => {
+    try {
+        const inboxId = parseInt(req.params.inboxId, 10);
+        const userId = req.user?.id;
+        const lyDo = (req.body?.ly_do || '').trim();
+        if (!inboxId) return fail(res, 'ID không hợp lệ');
+        if (!lyDo) return fail(res, 'Vui lòng nhập lý do trả lại');
+
+        const check = await db.query(
+            `SELECT trang_thai, outgoing_id FROM outgoing_internal_inbox WHERE id = $1 AND user_id = $2`,
+            [inboxId, userId]
+        );
+        if (!check.rows.length) return fail(res, 'Không tìm thấy văn bản trong hộp thư', 404);
+        if (check.rows[0].trang_thai !== 'da_tiep_nhan') {
+            return fail(res, 'Chỉ có thể trả lại sau khi đã tiếp nhận.');
+        }
+
+        await db.query(
+            `UPDATE outgoing_internal_inbox
+             SET trang_thai        = 'da_tra_lai',
+                 ly_do             = $3,
+                 responded_at      = NOW(),
+                 hidden_for_sender = false
+             WHERE id = $1 AND user_id = $2`,
+            [inboxId, userId, lyDo]
+        );
+
+        await logHistory({
+            document_id: check.rows[0].outgoing_id,
+            hanh_dong: 'TRA_LAI_VAN_BAN',
+            noi_dung: `Người nhận trả lại văn bản. Lý do: ${lyDo}`,
+            thuc_hien_boi: userId,
+        });
+
+        return ok(res, { id: inboxId }, 'Đã trả lại văn bản');
+    } catch (err) {
+        console.error('outgoingDocuments traLaiInbox error:', err);
+        return fail(res, 'Lỗi server', 500);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DELETE /van-ban-di/inbox-notification/:inboxId — văn thư/người gửi ẩn thông báo
+// bị từ chối / bị trả lại khỏi tab của mình.
+// ═══════════════════════════════════════════════════════════════════════════════
+const hideInboxNotification = async (req, res) => {
+    try {
+        const inboxId = parseInt(req.params.inboxId, 10);
+        const userId = req.user?.id;
+        if (!inboxId) return fail(res, 'ID không hợp lệ');
+
+        const result = await db.query(
+            `UPDATE outgoing_internal_inbox
+             SET hidden_for_sender = true
+             WHERE id = $1 AND sent_by = $2 AND trang_thai IN ('tu_choi', 'da_tra_lai')
+             RETURNING id`,
+            [inboxId, userId]
+        );
+        if (!result.rows.length) return fail(res, 'Không tìm thấy thông báo hoặc không có quyền xoá', 404);
+
+        return ok(res, { id: inboxId }, 'Đã xoá thông báo khỏi tab');
+    } catch (err) {
+        console.error('outgoingDocuments hideInboxNotification error:', err);
+        return fail(res, 'Lỗi server', 500);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GET /van-ban-di/:id/tinh-trang-tiep-nhan — danh sách người nhận + trạng thái
+// tiếp nhận (cho người gửi xem ai đã tiếp nhận / từ chối / chưa xem).
+// ═══════════════════════════════════════════════════════════════════════════════
+const getRecipientStatus = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        if (!id) return fail(res, 'ID không hợp lệ');
+
+        const { rows } = await db.query(
+            `SELECT i.id AS inbox_id, i.trang_thai, i.via_type, i.via_ref_id,
+                    i.sent_at, i.read_at, i.responded_at, i.ly_do,
+                    u.id AS user_id, u.full_name, u.email, u.chuc_vu,
+                    un.name AS via_org_name
+             FROM outgoing_internal_inbox i
+             JOIN users u ON u.id = i.user_id
+             LEFT JOIN organizations o ON o.id = i.via_ref_id AND i.via_type = 'org'
+             LEFT JOIN org_unit_names un ON un.id = o.name_id
+             WHERE i.outgoing_id = $1
+             ORDER BY
+                CASE i.trang_thai
+                    WHEN 'tu_choi' THEN 1
+                    WHEN 'da_tra_lai' THEN 2
+                    WHEN 'da_tiep_nhan' THEN 3
+                    WHEN 'da_doc' THEN 4
+                    WHEN 'chua_doc' THEN 5
+                    ELSE 6 END,
+                i.sent_at DESC`,
+            [id]
+        );
+
+        const items = rows.map((r) => ({
+            inboxId: r.inbox_id,
+            userId: r.user_id,
+            userName: r.full_name,
+            email: r.email,
+            chucVu: r.chuc_vu,
+            viaType: r.via_type,
+            viaOrgName: r.via_org_name,
+            trangThai: r.trang_thai,    // chua_doc | da_doc | da_tiep_nhan | tu_choi | da_tra_lai
+            sentAt: r.sent_at,
+            readAt: r.read_at,
+            respondedAt: r.responded_at,
+            lyDo: r.ly_do,
+        }));
+
+        // summary
+        const summary = {
+            total: items.length,
+            chua_xem: items.filter((x) => x.trangThai === 'chua_doc').length,
+            da_xem: items.filter((x) => x.trangThai === 'da_doc').length,
+            da_tiep_nhan: items.filter((x) => x.trangThai === 'da_tiep_nhan').length,
+            tu_choi: items.filter((x) => x.trangThai === 'tu_choi').length,
+            da_tra_lai: items.filter((x) => x.trangThai === 'da_tra_lai').length,
+        };
+
+        return ok(res, { items, summary });
+    } catch (err) {
+        console.error('outgoingDocuments getRecipientStatus error:', err);
+        return fail(res, 'Lỗi server', 500);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GET /van-ban-di/notifications — tab "Bị từ chối" / "Bị trả lại" cho văn thư
+//   Query: { kind: 'tu_choi' | 'da_tra_lai', search?, page?, limit? }
+//   Mỗi người từ chối/trả lại = 1 bản sao (row).
+// ═══════════════════════════════════════════════════════════════════════════════
+const listSenderNotifications = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) return fail(res, 'Chưa đăng nhập', 401);
+
+        const kind = req.query.kind === 'da_tra_lai' ? 'da_tra_lai' : 'tu_choi';
+        const { search, page = 1, limit = 20 } = req.query;
+
+        const conditions = [
+            'i.sent_by = $1',
+            'i.trang_thai = $2',
+            'i.hidden_for_sender = false',
+            'd.is_deleted = false',
+        ];
+        const params = [userId, kind];
+        let idx = 3;
+
+        if (search && String(search).trim()) {
+            conditions.push(
+                `(d.trich_yeu ILIKE $${idx} OR d.so_ky_hieu ILIKE $${idx} OR u.full_name ILIKE $${idx} OR COALESCE(i.ly_do,'') ILIKE $${idx})`
+            );
+            params.push(`%${search.trim()}%`);
+            idx++;
+        }
+
+        const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+        const sql = `
+            SELECT i.id AS inbox_id, i.trang_thai, i.ly_do, i.responded_at, i.sent_at,
+                   u.id AS user_id, u.full_name AS user_name, u.chuc_vu AS user_chuc_vu,
+                   d.id AS document_id, d.book_id, d.so_di, d.so_ky_hieu, d.loai_van_ban,
+                   d.ngay_ban_hanh, d.trich_yeu, d.do_khan,
+                   d.noi_nhan_ben_ngoai, d.noi_nhan_noi_bo,
+                   d.nguoi_ky_ten, d.chuc_vu, d.gan_dau_sao,
+                   b.name AS book_name, b.symbol AS book_symbol
+            FROM outgoing_internal_inbox i
+            JOIN outgoing_documents d ON d.id = i.outgoing_id
+            JOIN users u ON u.id = i.user_id
+            LEFT JOIN document_books b ON b.id = d.book_id
+            WHERE ${conditions.join(' AND ')}
+            ORDER BY i.responded_at DESC NULLS LAST, i.id DESC
+            LIMIT $${idx++} OFFSET $${idx++}
+        `;
+        params.push(parseInt(limit, 10), offset);
+
+        const { rows } = await db.query(sql, params);
+
+        // counts cho 2 kind
+        const countRes = await db.query(
+            `SELECT trang_thai, COUNT(*)::int AS cnt
+             FROM outgoing_internal_inbox
+             WHERE sent_by = $1 AND hidden_for_sender = false AND trang_thai IN ('tu_choi', 'da_tra_lai')
+             GROUP BY trang_thai`,
+            [userId]
+        );
+        const counts = { tu_choi: 0, da_tra_lai: 0 };
+        for (const r of countRes.rows) {
+            if (counts.hasOwnProperty(r.trang_thai)) counts[r.trang_thai] = r.cnt;
+        }
+
+        const items = [];
+        for (const r of rows) {
+            const files = await fetchFiles(r.document_id);
+            items.push({
+                inboxId: r.inbox_id,
+                trangThai: r.trang_thai,
+                lyDo: r.ly_do,
+                respondedAt: r.responded_at,
+                sentAt: r.sent_at,
+                recipient: {
+                    id: r.user_id,
+                    name: r.user_name,
+                    chucVu: r.user_chuc_vu,
+                },
+                id: r.document_id,
+                bookId: r.book_id,
+                bookName: r.book_name,
+                bookSymbol: r.book_symbol,
+                soDi: r.so_di,
+                soKyHieu: r.so_ky_hieu,
+                loaiVanBan: r.loai_van_ban,
+                ngayBanHanh: r.ngay_ban_hanh,
+                trichYeu: r.trich_yeu,
+                doKhan: r.do_khan,
+                noiNhanBenNgoai: r.noi_nhan_ben_ngoai,
+                noiNhanNoiBo: r.noi_nhan_noi_bo,
+                nguoiKyTen: r.nguoi_ky_ten,
+                chucVu: r.chuc_vu,
+                ganDauSao: r.gan_dau_sao,
+                files,
+            });
+        }
+
+        return ok(res, { items, counts }, 'Lấy danh sách thông báo thành công');
+    } catch (err) {
+        console.error('outgoingDocuments listSenderNotifications error:', err);
         return fail(res, 'Lỗi server', 500);
     }
 };
@@ -1016,7 +1432,13 @@ module.exports = {
     getOrgMembers,
     searchInternalUsers,
     getRecipients,
+    getRecipientStatus,
     guiNoiBo,
     listInternalInbox,
     markInboxAsRead,
+    tiepNhanInbox,
+    tuChoiInbox,
+    traLaiInbox,
+    hideInboxNotification,
+    listSenderNotifications,
 };

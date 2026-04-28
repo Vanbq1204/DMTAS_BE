@@ -94,11 +94,13 @@ router.get('/van-ban-di/don-vi/:orgId/thanh-vien', outgoingDocumentController.ge
 router.get('/so-van-ban-di',             outgoingDocumentController.getBooks);
 router.get('/van-ban-di/:id',            outgoingDocumentController.detail);
 router.get('/van-ban-di/:id/noi-nhan',   outgoingDocumentController.getRecipients);
+router.get('/van-ban-di/:id/tinh-trang-tiep-nhan', outgoingDocumentController.getRecipientStatus);
 router.post('/van-ban-di/:id/gui-noi-bo', outgoingDocumentController.guiNoiBo);
 router.post('/van-ban-di',               handleUpload, outgoingDocumentController.create);
 router.put('/van-ban-di/:id',            handleUpload, outgoingDocumentController.update);
 router.delete('/van-ban-di/:id',         outgoingDocumentController.destroy);
 router.patch('/van-ban-di/:id/trang-thai', outgoingDocumentController.changeStatus);
+router.delete('/van-ban-di/inbox-notification/:inboxId', outgoingDocumentController.hideInboxNotification);
 
 // Internal Incoming Documents (Văn bản đến nội bộ)
 router.get('/van-ban-noi-bo', incomingDocumentController.getInternalIncomingDocuments);
@@ -109,6 +111,9 @@ router.post('/van-ban-noi-bo/chuyen-tiep', incomingDocumentController.forwardInt
 // Tiếp nhận nội bộ (từ văn bản đi)
 router.get('/van-ban-noi-bo-tiep-nhan',                outgoingDocumentController.listInternalInbox);
 router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/da-doc', outgoingDocumentController.markInboxAsRead);
+router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/tiep-nhan', outgoingDocumentController.tiepNhanInbox);
+router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/tu-choi', outgoingDocumentController.tuChoiInbox);
+router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/tra-lai', outgoingDocumentController.traLaiInbox);
 
 /* ─── Văn bản dự thảo (văn thư) ─── */
 const duThaoController = require('../controllers/duThaoController');
@@ -119,6 +124,7 @@ router.get('/loai-van-ban', duThaoController.getLoaiVanBan);
 router.get('/du-thao/nguoi-ky', duThaoController.getNguoiKy);
 router.get('/du-thao/org-tree', duThaoController.getOrgTree);
 router.get('/du-thao/org/:orgId/members', duThaoController.getOrgMembers);
+router.get('/du-thao/van-thu-cua-toi', duThaoController.getVanThuCungDonVi);
 router.get('/du-thao/files/:fileId/preview', duThaoController.previewFileDuThao);
 router.get('/du-thao/:id/files/:fileId/onlyoffice-config', duThaoController.getOnlyOfficeConfig);
 router.get('/du-thao', duThaoController.getDuThaoList);
@@ -133,6 +139,7 @@ router.put('/du-thao/:id', uploadFields.fields([
     { name: 'tep_kem_theo', maxCount: 10 }
 ]), duThaoController.capNhatDuThao);
 router.post('/du-thao/:id/chuyen', duThaoController.chuyenDuThao);
+router.post('/du-thao/:id/phat-hanh', duThaoController.phatHanhDuThao);
 router.delete('/du-thao/:id', duThaoController.xoaDuThao);
 router.delete('/du-thao/:id/files/:fileId', duThaoController.xoaFileDuThao);
 router.put('/du-thao/:id/files/:fileId', uploadFields.single('file'), duThaoController.capNhatFileDuThao);

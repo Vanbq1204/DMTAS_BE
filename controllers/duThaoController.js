@@ -77,6 +77,8 @@ const initTables = async () => {
     `);
     // Thêm cột chuc_vu vào bảng users nếu chưa có
     await db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS chuc_vu VARCHAR(200)`);
+    // Liên kết dự thảo đã phát hành với văn bản đi tương ứng
+    await db.query(`ALTER TABLE van_ban_du_thao ADD COLUMN IF NOT EXISTS outgoing_document_id INTEGER`);
 };
 
 initTables().catch(err => console.error('duThaoController initTables error:', err));
@@ -570,9 +572,20 @@ const getDuThaoDetail = async (req, res) => {
     const { id } = req.params;
     try {
         const result = await db.query(
-            `SELECT d.*,
+             `SELECT d.*,
                     u.full_name  AS nguoi_soan,
                     dep.name     AS don_vi_soan,
+                    -- Tên / id đơn vị (organizations) chính của người soạn — để map sang
+                    -- form Văn bản đi vốn dùng bảng organizations cho dropdown đơn vị soạn thảo.
+                    (SELECT un.name FROM user_positions up2
+                       JOIN organizations o2 ON o2.id = up2.org_id
+                       JOIN org_unit_names un ON un.id = o2.name_id
+                      WHERE up2.user_id = u.id AND up2.is_primary = true LIMIT 1
+                    ) AS don_vi_soan_org_name,
+                    (SELECT o2.id FROM user_positions up2
+                       JOIN organizations o2 ON o2.id = up2.org_id
+                      WHERE up2.user_id = u.id AND up2.is_primary = true LIMIT 1
+                    ) AS don_vi_soan_org_id,
                     inc.so_hieu  AS van_ban_den_so_hieu,
                     inc.trich_yeu AS van_ban_den_trich_yeu,
                     EXISTS (
@@ -582,6 +595,14 @@ const getDuThaoDetail = async (req, res) => {
                           AND c.nguoi_nhan_id = $2
                           AND c.trang_thai = 'cho_xu_ly'
                     ) AS is_active_receiver,
+                    EXISTS (
+                        SELECT 1
+                        FROM van_ban_du_thao_chuyen c
+                        WHERE c.du_thao_id = d.id
+                          AND c.nguoi_nhan_id = $2
+                          AND c.loai_chuyen = 'phoi_hop'
+                          AND c.trang_thai = 'cho_xu_ly'
+                    ) AS is_phoi_hop_for_me,
                     (
                         SELECT json_agg(json_build_object(
                             'id', f.id, 'loai_tep', f.loai_tep, 'ten_file', f.ten_file,
@@ -599,7 +620,7 @@ const getDuThaoDetail = async (req, res) => {
                         SELECT du_thao_id FROM van_ban_du_thao_chuyen
                         WHERE nguoi_nhan_id = $2
                     )
-                    OR (d.nguoi_ky_id = $2 AND d.trang_thai = 'dang_trinh_ky')
+                    OR (d.nguoi_ky_id = $2 AND d.trang_thai IN ('dang_trinh_ky','da_ky'))
                )`,
             [id, userId]
         );
@@ -960,17 +981,84 @@ const getOrgTree = async (req, res) => {
 
 const getOrgMembers = async (req, res) => {
     const { orgId } = req.params;
+    // Hỗ trợ query ?roles=lanh_dao,nhan_vien để lọc theo role
+    const rolesQuery = (req.query?.roles || '').toString().trim();
+    const allowedRoles = rolesQuery
+        ? rolesQuery.split(',').map(s => s.trim()).filter(Boolean)
+        : null;
+    // Loại trừ chính người dùng đang đăng nhập (mặc định)
+    const excludeSelf = (req.query?.exclude_self || '1') !== '0';
+    const userId = req.user?.id;
     try {
+        const params = [orgId];
+        let where = `up.org_id = $1 AND u.is_active = true`;
+        if (allowedRoles && allowedRoles.length) {
+            params.push(allowedRoles);
+            where += ` AND u.role = ANY($${params.length}::text[])`;
+        }
+        if (excludeSelf && userId) {
+            params.push(userId);
+            where += ` AND u.id <> $${params.length}`;
+        }
         const result = await db.query(`
-            SELECT u.id, u.full_name, u.email, u.role, up.title AS chuc_vu
+            SELECT DISTINCT u.id, u.full_name, u.email, u.role, up.title AS chuc_vu
             FROM user_positions up
             JOIN users u ON u.id = up.user_id
-            WHERE up.org_id = $1 AND u.is_active = true
+            WHERE ${where}
             ORDER BY up.title, u.full_name
-        `, [orgId]);
+        `, params);
         return ok(res, result.rows);
     } catch (err) {
         console.error('getOrgMembers error:', err);
+        return fail(res, 'Lỗi server', 500);
+    }
+};
+
+/* ══════════════════════════════════════════════
+   DANH SÁCH VĂN THƯ CÙNG ĐƠN VỊ VỚI USER HIỆN TẠI
+   (dùng khi lãnh đạo bấm "Chuyển văn thư")
+   ══════════════════════════════════════════════ */
+const getVanThuCungDonVi = async (req, res) => {
+    const userId = req.user.id;
+    try {
+        // 1) Lấy danh sách org_id mà user hiện tại thuộc về (qua user_positions).
+        const myOrgsRes = await db.query(
+            `SELECT DISTINCT org_id FROM user_positions WHERE user_id = $1`,
+            [userId]
+        );
+        const orgIds = myOrgsRes.rows.map(r => r.org_id).filter(Boolean);
+
+        // 2) Lấy ds văn thư trong cùng các org này (loại trừ chính mình).
+        let result;
+        if (orgIds.length) {
+            result = await db.query(
+                `SELECT DISTINCT u.id, u.full_name, u.email, u.role,
+                        up.title AS chuc_vu,
+                        un.name  AS don_vi
+                 FROM users u
+                 JOIN user_positions up ON up.user_id = u.id
+                 LEFT JOIN organizations o   ON o.id = up.org_id
+                 LEFT JOIN org_unit_names un ON un.id = o.name_id
+                 WHERE up.org_id = ANY($1::int[])
+                   AND u.role = 'van_thu'
+                   AND u.is_active = true
+                   AND u.id <> $2
+                 ORDER BY u.full_name`,
+                [orgIds, userId]
+            );
+        } else {
+            // Fallback: không tìm được đơn vị → trả về toàn bộ văn thư active để không khoá UI
+            result = await db.query(
+                `SELECT u.id, u.full_name, u.email, u.role, u.chuc_vu
+                 FROM users u
+                 WHERE u.role = 'van_thu' AND u.is_active = true AND u.id <> $1
+                 ORDER BY u.full_name`,
+                [userId]
+            );
+        }
+        return ok(res, result.rows);
+    } catch (err) {
+        console.error('getVanThuCungDonVi error:', err);
         return fail(res, 'Lỗi server', 500);
     }
 };
@@ -1261,7 +1349,27 @@ const signDuThaoPdfWithAsset = async (req, res) => {
         const hanhDong = action_type === 'stamp' ? 'DONG_DAU' : 'KY_SO';
         const yKienLog = (y_kien || '').toString().trim() || (action_type === 'stamp' ? 'Đóng dấu lên văn bản' : 'Ký lên văn bản');
         await logLichSu(duThaoId, userId, hanhDong, yKienLog, null, 'Đã ký văn bản', [affectedFileId]);
-        await db.query('UPDATE van_ban_du_thao SET updated_at = NOW() WHERE id = $1', [duThaoId]);
+
+        // Sau khi ký thành công và văn bản đang ở trạng thái "đang trình ký",
+        // chuyển sang "đã ký" để lãnh đạo có thể bấm "Chuyển văn thư".
+        let newTrangThai = perm.doc.trang_thai;
+        if (hanhDong === 'KY_SO' && perm.doc.trang_thai === 'dang_trinh_ky') {
+            await db.query(
+                `UPDATE van_ban_du_thao SET trang_thai='da_ky', updated_at = NOW() WHERE id = $1`,
+                [duThaoId]
+            );
+            newTrangThai = 'da_ky';
+            // Đánh dấu các bản ghi chuyển ký_duyệt đang ở 'cho_xu_ly' của chính người ký là 'da_xu_ly'
+            // để giải phóng quyền chỉnh sửa, nhưng vẫn giữ trạng thái doc là 'da_ky' để Chuyển văn thư.
+            await db.query(
+                `UPDATE van_ban_du_thao_chuyen
+                 SET trang_thai='da_xu_ly'
+                 WHERE du_thao_id=$1 AND nguoi_nhan_id=$2 AND loai_chuyen='ky_duyet' AND trang_thai='cho_xu_ly'`,
+                [duThaoId, userId]
+            );
+        } else {
+            await db.query('UPDATE van_ban_du_thao SET updated_at = NOW() WHERE id = $1', [duThaoId]);
+        }
 
         return ok(res, {
             file_id: affectedFileId,
@@ -1270,6 +1378,7 @@ const signDuThaoPdfWithAsset = async (req, res) => {
             kich_thuoc: outBytes.length,
             action: hanhDong,
             created_new_pdf: !updateSameFile,
+            trang_thai: newTrangThai,
         }, 'Ký/đóng dấu thành công');
     } catch (err) {
         console.error('signDuThaoPdfWithAsset error:', err);
@@ -1283,19 +1392,22 @@ const signDuThaoPdfWithAsset = async (req, res) => {
 const chuyenDuThao = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
-    const { nguoi_nhan_id, y_kien, loai_chuyen = 'xu_ly' } = req.body;
+    const { nguoi_nhan_id, nguoi_nhan_ids, y_kien, loai_chuyen = 'xu_ly' } = req.body;
 
     // Map loai_chuyen → trang_thai mới của dự thảo
+    // Riêng 'phoi_hop' không thay đổi trang_thai của doc (giữ trạng thái hiện tại
+    // để người gửi vẫn có thể tiếp tục chỉnh sửa, đồng thời nhiều người được phối hợp).
     const trangThaiMap = {
         xu_ly:    'cho_xu_ly',
         ky_duyet: 'dang_trinh_ky',
         van_thu:  'cho_ban_hanh',
         tra_lai_nguoi_soan: 'bi_tra_lai',
     };
-    const trangThaiMoi = trangThaiMap[loai_chuyen] || 'cho_xu_ly';
+    const trangThaiMoi = trangThaiMap[loai_chuyen] || null;
 
     try {
         // Kiểm tra quyền: người gửi phải là người tạo HOẶC là người nhận hiện tại
+        // Riêng "Chuyển văn thư": cho phép nếu lãnh đạo là người ký và văn bản đã ký
         const check = await db.query(
             `SELECT id, trang_thai, created_by, nguoi_ky_id
              FROM van_ban_du_thao d
@@ -1309,11 +1421,17 @@ const chuyenDuThao = async (req, res) => {
                           AND c.nguoi_nhan_id=$2
                           AND c.trang_thai='cho_xu_ly'
                     )
+                    OR ($3 = 'van_thu' AND d.trang_thai='da_ky' AND d.nguoi_ky_id=$2)
                )`,
-            [id, userId]
+            [id, userId, loai_chuyen]
         );
         if (!check.rows.length) return fail(res, 'Không tìm thấy hoặc không có quyền', 404);
         const doc = check.rows[0];
+
+        // Validation thêm: chỉ cho phép chuyển văn thư khi văn bản đã được ký
+        if (loai_chuyen === 'van_thu' && doc.trang_thai !== 'da_ky') {
+            return fail(res, 'Chỉ có thể chuyển văn thư sau khi văn bản đã được lãnh đạo ký');
+        }
 
         // Với các loại chuyển thông thường, bắt buộc phải chọn người nhận.
         // Riêng "trả lại người soạn" sẽ tự động nhận là người tạo ban đầu.
@@ -1334,10 +1452,47 @@ const chuyenDuThao = async (req, res) => {
             if (!(y_kien || '').toString().trim()) {
                 return fail(res, 'Vui lòng nhập ý kiến trước khi chuyển ký duyệt');
             }
+        } else if (loai_chuyen === 'phoi_hop') {
+            // Đồng phối hợp dự thảo: chấp nhận mảng nguoi_nhan_ids hoặc 1 nguoi_nhan_id
+            const ids = Array.isArray(nguoi_nhan_ids) && nguoi_nhan_ids.length
+                ? nguoi_nhan_ids.map(Number).filter(Boolean)
+                : (nguoi_nhan_id ? [Number(nguoi_nhan_id)] : []);
+            if (!ids.length) return fail(res, 'Vui lòng chọn ít nhất một người để phối hợp dự thảo');
+            if (ids.includes(Number(userId))) {
+                return fail(res, 'Không thể phối hợp dự thảo với chính mình');
+            }
+            finalNguoiNhanId = ids; // sẽ xử lý phía dưới
         } else if (!finalNguoiNhanId) {
             return fail(res, 'Vui lòng chọn người nhận');
         }
 
+        // Trường hợp ĐỒNG PHỐI HỢP: insert nhiều bản ghi, KHÔNG đóng record cũ,
+        // KHÔNG thay đổi trang_thai của doc (creator vẫn có thể chỉnh sửa).
+        if (loai_chuyen === 'phoi_hop' && Array.isArray(finalNguoiNhanId)) {
+            const trangThaiLabel = 'Phối hợp dự thảo';
+            for (const nhanId of finalNguoiNhanId) {
+                // Bỏ qua nếu đã có bản ghi 'cho_xu_ly' phối hợp cho người này
+                const existed = await db.query(
+                    `SELECT 1 FROM van_ban_du_thao_chuyen
+                     WHERE du_thao_id=$1 AND nguoi_nhan_id=$2
+                       AND loai_chuyen='phoi_hop' AND trang_thai='cho_xu_ly' LIMIT 1`,
+                    [id, nhanId]
+                );
+                if (existed.rows.length) continue;
+                await db.query(
+                    `INSERT INTO van_ban_du_thao_chuyen
+                     (du_thao_id, nguoi_gui_id, nguoi_nhan_id, loai_chuyen, y_kien, trang_thai)
+                     VALUES ($1,$2,$3,'phoi_hop',$4,'cho_xu_ly')`,
+                    [id, userId, nhanId, y_kien || null]
+                );
+                await logLichSu(id, userId, 'CHUYEN', y_kien, nhanId, trangThaiLabel, []);
+            }
+            await db.query(`UPDATE van_ban_du_thao SET updated_at=NOW() WHERE id=$1`, [id]);
+            return ok(res, { id, loai_chuyen: 'phoi_hop', count: finalNguoiNhanId.length },
+                      'Đã chuyển phối hợp dự thảo thành công');
+        }
+
+        // Trường hợp còn lại: chuyển toàn quyền (xu_ly, ky_duyet, van_thu, tra_lai_nguoi_soan)
         // Đánh dấu chuyển cũ (nếu có) là đã xử lý
         await db.query(
             `UPDATE van_ban_du_thao_chuyen SET trang_thai='da_xu_ly'
@@ -1353,11 +1508,13 @@ const chuyenDuThao = async (req, res) => {
             [id, userId, finalNguoiNhanId, loai_chuyen, y_kien || null]
         );
 
-        // Cập nhật trang_thai của dự thảo
-        await db.query(
-            `UPDATE van_ban_du_thao SET trang_thai=$1, updated_at=NOW() WHERE id=$2`,
-            [trangThaiMoi, id]
-        );
+        // Cập nhật trang_thai của dự thảo (nếu có map)
+        if (trangThaiMoi) {
+            await db.query(
+                `UPDATE van_ban_du_thao SET trang_thai=$1, updated_at=NOW() WHERE id=$2`,
+                [trangThaiMoi, id]
+            );
+        }
 
         // Ghi lịch sử CHUYỂN
         const trangThaiLabel = loai_chuyen === 'xu_ly' ? 'Chuyển xử lý'
@@ -1366,7 +1523,7 @@ const chuyenDuThao = async (req, res) => {
             : 'Trả lại người soạn';
         await logLichSu(id, userId, 'CHUYEN', y_kien, finalNguoiNhanId, trangThaiLabel, []);
 
-        return ok(res, { id, trang_thai: trangThaiMoi }, 'Chuyển thành công');
+        return ok(res, { id, trang_thai: trangThaiMoi || doc.trang_thai }, 'Chuyển thành công');
     } catch (err) {
         console.error('chuyenDuThao error:', err);
         return fail(res, 'Lỗi server', 500);
@@ -1387,6 +1544,20 @@ const getDuThaoListShared = async (req, res) => {
                    dep.name     AS don_vi_soan,
                    inc.so_hieu  AS van_ban_den_so_hieu,
                    inc.trich_yeu AS van_ban_den_trich_yeu,
+                   EXISTS (
+                       SELECT 1 FROM van_ban_du_thao_chuyen c
+                       WHERE c.du_thao_id = d.id
+                         AND c.nguoi_nhan_id = $1
+                         AND c.loai_chuyen = 'phoi_hop'
+                         AND c.trang_thai = 'cho_xu_ly'
+                   ) AS is_phoi_hop_for_me,
+                   EXISTS (
+                       SELECT 1 FROM van_ban_du_thao_chuyen c
+                       WHERE c.du_thao_id = d.id
+                         AND c.nguoi_nhan_id = $1
+                         AND c.loai_chuyen IN ('xu_ly','ky_duyet','van_thu','tra_lai_nguoi_soan')
+                         AND c.trang_thai = 'cho_xu_ly'
+                   ) AS is_active_receiver,
                    (
                        SELECT json_agg(json_build_object(
                            'id',f.id,'loai_tep',f.loai_tep,'ten_file',f.ten_file,
@@ -1404,7 +1575,12 @@ const getDuThaoListShared = async (req, res) => {
                     SELECT du_thao_id FROM van_ban_du_thao_chuyen
                     WHERE nguoi_nhan_id = $1 AND trang_thai = 'cho_xu_ly'
                 )
-                OR (d.nguoi_ky_id = $1 AND d.trang_thai = 'dang_trinh_ky')
+                -- Văn thư vẫn nhìn thấy dự thảo sau khi đã phát hành (loai_chuyen='van_thu' kể cả da_xu_ly)
+                OR d.id IN (
+                    SELECT du_thao_id FROM van_ban_du_thao_chuyen
+                    WHERE nguoi_nhan_id = $1 AND loai_chuyen = 'van_thu'
+                )
+                OR (d.nguoi_ky_id = $1 AND d.trang_thai IN ('dang_trinh_ky','da_ky'))
             )
         `;
         const params = [userId];
@@ -1423,6 +1599,149 @@ const getDuThaoListShared = async (req, res) => {
     }
 };
 
+/* ══════════════════════════════════════════════
+   PHÁT HÀNH VĂN BẢN DỰ THẢO
+   - Văn thư phát hành dự thảo bằng cách tạo văn bản đi từ dự thảo này.
+   - Frontend gọi API này SAU KHI đã tạo thành công văn bản đi (truyền
+     outgoing_document_id vào). Backend chỉ xác nhận và đánh dấu dự thảo
+     đã ban hành, đồng thời đóng bản ghi tiếp nhận của văn thư.
+   ══════════════════════════════════════════════ */
+const phatHanhDuThao = async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { outgoing_document_id, selected_file_ids } = req.body || {};
+
+    if (!outgoing_document_id) {
+        return fail(res, 'Thiếu mã văn bản đi đã tạo');
+    }
+
+    // Chuẩn hoá selected_file_ids (nếu có) → mảng số. Nếu không có thì copy toàn bộ (back-compat).
+    let selectedFileIds = null;
+    if (Array.isArray(selected_file_ids)) {
+        selectedFileIds = selected_file_ids.map((v) => Number(v)).filter(Boolean);
+    } else if (typeof selected_file_ids === 'string' && selected_file_ids.trim()) {
+        selectedFileIds = selected_file_ids.split(',').map((v) => Number(v.trim())).filter(Boolean);
+    }
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Kiểm tra văn thư có quyền phát hành: phải là người đang giữ
+        // bản ghi chuyển 'van_thu' trạng thái 'cho_xu_ly' của dự thảo này
+        const docRes = await client.query(
+            `SELECT d.id, d.trang_thai, d.outgoing_document_id, d.ma_du_thao,
+                    EXISTS (
+                        SELECT 1 FROM van_ban_du_thao_chuyen c
+                        WHERE c.du_thao_id = d.id
+                          AND c.nguoi_nhan_id = $2
+                          AND c.loai_chuyen = 'van_thu'
+                          AND c.trang_thai = 'cho_xu_ly'
+                    ) AS is_van_thu_receiver
+             FROM van_ban_du_thao d
+             WHERE d.id = $1 AND d.is_deleted = false`,
+            [id, userId]
+        );
+        if (!docRes.rows.length) {
+            await client.query('ROLLBACK');
+            return fail(res, 'Không tìm thấy dự thảo', 404);
+        }
+        const doc = docRes.rows[0];
+        if (!doc.is_van_thu_receiver) {
+            await client.query('ROLLBACK');
+            return fail(res, 'Bạn không có quyền phát hành dự thảo này', 403);
+        }
+        if (doc.trang_thai !== 'cho_ban_hanh') {
+            await client.query('ROLLBACK');
+            return fail(res, 'Chỉ có thể phát hành dự thảo ở trạng thái Chờ phát hành');
+        }
+        if (doc.outgoing_document_id) {
+            await client.query('ROLLBACK');
+            return fail(res, 'Dự thảo này đã được phát hành trước đó');
+        }
+
+        // Xác nhận văn bản đi tồn tại
+        const odRes = await client.query(
+            `SELECT id, so_ky_hieu, so_di FROM outgoing_documents WHERE id = $1 AND is_deleted = false`,
+            [outgoing_document_id]
+        );
+        if (!odRes.rows.length) {
+            await client.query('ROLLBACK');
+            return fail(res, 'Không tìm thấy văn bản đi vừa tạo', 404);
+        }
+        const od = odRes.rows[0];
+
+        // Cập nhật dự thảo: trang_thai = 'da_ban_hanh', gắn outgoing_document_id
+        await client.query(
+            `UPDATE van_ban_du_thao
+             SET trang_thai = 'da_ban_hanh', outgoing_document_id = $1, updated_at = NOW()
+             WHERE id = $2`,
+            [outgoing_document_id, id]
+        );
+
+        // Đóng các bản ghi chuyển van_thu đang chờ xử lý
+        await client.query(
+            `UPDATE van_ban_du_thao_chuyen
+             SET trang_thai = 'da_xu_ly'
+             WHERE du_thao_id = $1 AND loai_chuyen = 'van_thu' AND trang_thai = 'cho_xu_ly'`,
+            [id]
+        );
+
+        // Sao chép file đã chọn (mặc định: toàn bộ) từ dự thảo sang văn bản đi.
+        // Văn thư có thể chọn cụ thể file đã ký nào sẽ trở thành file ban hành.
+        let filesRes;
+        if (selectedFileIds && selectedFileIds.length) {
+            filesRes = await client.query(
+                `SELECT ten_file, duong_dan, kich_thuoc, loai_tep
+                 FROM van_ban_du_thao_files
+                 WHERE du_thao_id = $1 AND id = ANY($2::int[])
+                 ORDER BY uploaded_at`,
+                [id, selectedFileIds]
+            );
+        } else {
+            filesRes = await client.query(
+                `SELECT ten_file, duong_dan, kich_thuoc, loai_tep
+                 FROM van_ban_du_thao_files
+                 WHERE du_thao_id = $1
+                 ORDER BY uploaded_at`,
+                [id]
+            );
+        }
+        for (const f of filesRes.rows) {
+            const ext = (f.ten_file || '').split('.').pop()?.toLowerCase() || (f.loai_tep || '');
+            await client.query(
+                `INSERT INTO outgoing_document_files
+                 (document_id, ten_file, duong_dan, loai_file, kich_thuoc, uploaded_by, uploaded_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+                [outgoing_document_id, f.ten_file, f.duong_dan, ext, f.kich_thuoc || 0, userId]
+            );
+        }
+
+        await logLichSu(
+            id,
+            userId,
+            'PHAT_HANH',
+            `Phát hành thành văn bản đi: ${od.so_ky_hieu || ''}${od.so_di ? ` (Số đi: ${od.so_di})` : ''}`,
+            null,
+            'Đã ban hành',
+            []
+        );
+
+        await client.query('COMMIT');
+        return ok(
+            res,
+            { id: Number(id), outgoing_document_id: Number(outgoing_document_id), trang_thai: 'da_ban_hanh' },
+            'Đã phát hành dự thảo thành văn bản đi'
+        );
+    } catch (err) {
+        try { await client.query('ROLLBACK'); } catch (_) {}
+        console.error('phatHanhDuThao error:', err);
+        return fail(res, 'Lỗi server', 500);
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
     getDepartments,
     getMe,
@@ -1430,6 +1749,7 @@ module.exports = {
     getNguoiKy,
     getOrgTree,
     getOrgMembers,
+    getVanThuCungDonVi,
     chuyenDuThao,
     taoVanBanDuThao,
     getDuThaoList: getDuThaoListShared,
@@ -1445,4 +1765,5 @@ module.exports = {
     getOnlyOfficeConfig,
     setOnlyOfficeSessionNote,
     onlyOfficeCallback,
+    phatHanhDuThao,
 };

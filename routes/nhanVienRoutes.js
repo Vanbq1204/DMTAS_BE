@@ -18,6 +18,9 @@ router.use(requireRole('nhan_vien', 'van_thu'));
 // Tiếp nhận nội bộ (từ văn bản đi)
 router.get('/van-ban-noi-bo-tiep-nhan',                outgoingDocumentController.listInternalInbox);
 router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/da-doc', outgoingDocumentController.markInboxAsRead);
+router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/tiep-nhan', outgoingDocumentController.tiepNhanInbox);
+router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/tu-choi',   outgoingDocumentController.tuChoiInbox);
+router.post('/van-ban-noi-bo-tiep-nhan/:inboxId/tra-lai',   outgoingDocumentController.traLaiInbox);
 
 router.get('/ho-so/dau-muc', workProfileHeadingController.list);
 router.post('/ho-so/dau-muc', workProfileHeadingController.create);
@@ -72,6 +75,7 @@ router.get('/loai-van-ban', duThaoController.getLoaiVanBan);
 router.get('/du-thao/nguoi-ky', duThaoController.getNguoiKy);
 router.get('/du-thao/org-tree', duThaoController.getOrgTree);
 router.get('/du-thao/org/:orgId/members', duThaoController.getOrgMembers);
+router.get('/du-thao/van-thu-cua-toi', duThaoController.getVanThuCungDonVi);
 router.get('/du-thao/files/:fileId/preview', duThaoController.previewFileDuThao);
 router.get('/du-thao/:id/files/:fileId/onlyoffice-config', duThaoController.getOnlyOfficeConfig);
 router.post('/du-thao/:id/files/:fileId/onlyoffice-session-note', duThaoController.setOnlyOfficeSessionNote);
